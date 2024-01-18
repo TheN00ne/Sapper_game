@@ -10,6 +10,7 @@ function App(){
   let [field, setField] = useState([]);
   let [end, setEnd] = useState(false);
   let [id, setId] = useState(0);
+  let [isFirst, setIsFirst] = useState(true);
 
   useEffect(() => {
     for(let i = 0; i < 21; i++){
@@ -42,8 +43,6 @@ function App(){
       bombs2();
       bombs3();
 
-      console.log(b1,b2,b3)
-
       for(let j = 0; j < 21; j++){
         let isB;
         if((j == b1) || (j == b2) || (j == b3)){
@@ -52,7 +51,7 @@ function App(){
         else{
           isB = false;
         }
-        row.push({id:id, rowId:j, isBomb:isB, value:null});
+        row.push({id:id, rowId:j, isBomb:isB, value:null, isOpen:false});
         setId(id++);
       }
       field.push(row);
@@ -78,52 +77,110 @@ function App(){
             let prevCell = idC-1;
             let nextCell = idC+1;
   
-            if(prevRow < 0){
-              prevRow = idR;
+            if((prevRow >= 0) && (prevCell >= 0)){
+              if(field[prevRow][prevCell].isBomb){
+                val++;  
+              }
             }
-            if(nextRow > 0){
-              nextRow = idR;
+
+            if(prevRow >= 0){
+              if(field[prevRow][idC].isBomb){
+                val++;
+              }
             }
-            if(prevCell < 0){
-              prevCell = idC;
+
+            if((prevRow >= 0) && (nextCell <= row.length-1)){
+              if(field[prevRow][nextCell].isBomb){
+                val++;
+              }
             }
-            if(nextCell > 0){
-              nextCell = idC;
+
+            if(prevCell >= 0){
+              if(field[idR][prevCell].isBomb){
+                val++;
+              }
             }
-  
-            if(field[prevRow][prevCell].isBomb){
-              val = val + 1;
+
+            if(nextCell <= row.length-1){
+              if(field[idR][nextCell].isBomb){
+                val++;
+              }
             }
-            if(field[prevRow][cell.rowId].isBomb){
-              val = val + 1;
+
+            if((nextRow <= field.length-1) && (prevCell >= 0)){
+              if(field[nextRow][prevCell].isBomb){
+                val++;
+              } 
             }
-            if(field[prevRow][nextRow].isBomb){
-              val = val + 1;
+
+            if(nextRow <= field.length-1){
+              if(field[nextRow][idC].isBomb){
+                val++;
+              } 
             }
-            if(field[cell.rowId][prevCell].isBomb){
-              val = val + 1;
-            }
-            if(field[cell.rowId][nextCell].isBomb){
-              val = val + 1;
-            }
-            if(field[nextRow][prevCell].isBomb){
-              val = val + 1;
-            }
-            if(field[nextRow][cell.rowId].isBomb){
-              val = val + 1;
-            }
-            if(field[nextRow][nextCell].isBomb){
-              val = val + 1;
+
+            if((nextRow <= field.length-1) && (nextCell <= row.length-1)){
+              if(field[nextRow][nextCell].isBomb){
+                val++;
+              }
             }
           }
-          return {id:cell.id, rowId:cell.rowId, isBomb:cell.isBomb, value:val}
+          return {id:cell.id, rowId:cell.rowId, isBomb:cell.isBomb, value:val, isOpen:false}
         })
         return newRow;
       })
       setField(newArr);
-      console.log(newArr)
     }
   }, [end])
+
+  function open(cell){
+    let newArr = field.map((row) => {
+      let newRow = row.map((el) => {
+        if(el.id == cell.id){
+          return {id:cell.id, rowId:cell.rowId, isBomb:cell.isBomb, value:cell.value, isOpen:true}
+        }
+        else{
+          return el;
+        }
+      })
+      return newRow; 
+    })
+    setField(newArr);
+  }
+
+  function poly(cell){
+    if(isFirst){
+      let newArr = field.map((row) => {
+        let newRow = row.map((el) => {
+          if((el.id == cell.id-22) || (el.id == cell.id-21) || (el.id == cell.id-20) || (el.id == cell.id) || (el.id == cell.id-1) || (el.id == cell.id+1) || (el.id == cell.id+20) || (el.id == cell.id+21) || (el.id == cell.id+22)){
+            if(el.isBomb == false){
+              return {id:el.id, rowId:el.rowId, isBomb:el.isBomb, value:el.value, isOpen:true}
+            }
+            else{
+              return el;
+            }
+          }
+          else{
+            return el;
+          }
+        })
+        return newRow; 
+      })
+      setField(newArr);
+      setIsFirst(false);
+    }
+  }
+
+  useEffect(() => {
+    field.map((row) => {
+      row.map((cell) => {
+        if((cell.isBomb) && (cell.isOpen)){
+          alert("You lose!");
+          document.location.reload();
+        }
+      })
+    })
+  }, [field])
 
   return(
     <div>
@@ -133,7 +190,7 @@ function App(){
           {field.map((row) => {
             return(
               row.map((cell) => (
-                <div className={style1.cell} key={cell.id}>{cell.value}</div>
+                <div className={style1.cell} key={cell.id} onClick={() => {open(cell); poly(cell)}}>{cell.isOpen ? cell.value : null}</div>
               ))
             )
           })}
