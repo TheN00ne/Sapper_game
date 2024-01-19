@@ -51,7 +51,7 @@ function App(){
         else{
           isB = false;
         }
-        row.push({id:id, rowId:j, isBomb:isB, value:null, isOpen:false});
+        row.push({id:id, rowId:j, isBomb:isB, row:i, value:null, isOpen:false});
         setId(id++);
       }
       field.push(row);
@@ -125,7 +125,7 @@ function App(){
               }
             }
           }
-          return {id:cell.id, rowId:cell.rowId, isBomb:cell.isBomb, value:val, isOpen:false}
+          return {id:cell.id, rowId:cell.rowId, isBomb:cell.isBomb, row:idR, value:val, isOpen:false}
         })
         return newRow;
       })
@@ -134,10 +134,10 @@ function App(){
   }, [end])
 
   function open(cell){
-    let newArr = field.map((row) => {
+    let newArr = field.map((row, idR) => {
       let newRow = row.map((el) => {
         if(el.id == cell.id){
-          return {id:cell.id, rowId:cell.rowId, isBomb:cell.isBomb, value:cell.value, isOpen:true}
+          return {id:cell.id, rowId:cell.rowId, row:idR, isBomb:cell.isBomb, value:cell.value, isOpen:true}
         }
         else{
           return el;
@@ -148,13 +148,52 @@ function App(){
     setField(newArr);
   }
 
+  // function aaa(cell){
+  //     let newArr = field.map((row) => {
+  //       let newRow = row.map((el) => {
+  //         if((el.id == cell.id-22) || (el.id == cell.id-21) || (el.id == cell.id-20) || (el.id == cell.id) || (el.id == cell.id-1) || (el.id == cell.id+1) || (el.id == cell.id+20) || (el.id == cell.id+21) || (el.id == cell.id+22)){
+  //             console.log("aaa");
+  //             return {id:el.id, rowId:el.rowId, isBomb:el.isBomb, value:el.value, isOpen:true}
+  //         }
+  //         else{
+  //           return el;
+  //         }
+  //       })
+  //       return newRow;
+  //     })
+  //     return(newArr);
+  // }
+
   function poly(cell){
     if(isFirst){
       let newArr = field.map((row) => {
         let newRow = row.map((el) => {
-          if((el.id == cell.id-22) || (el.id == cell.id-21) || (el.id == cell.id-20) || (el.id == cell.id) || (el.id == cell.id-1) || (el.id == cell.id+1) || (el.id == cell.id+20) || (el.id == cell.id+21) || (el.id == cell.id+22)){
+          if(
+            ((el.rowId == cell.rowId-1) && (el.row == cell.row - 1)) ||
+            ((el.rowId == cell.rowId) && (el.row == cell.row - 1)) ||
+            ((el.rowId == cell.rowId+1) && (el.row == cell.row - 1)) || 
+            ((el.rowId == cell.rowId-1) && (el.row == cell.row)) || 
+            ((el.rowId == cell.rowId) && (el.row == cell.row)) || 
+            ((el.rowId == cell.rowId+1) && (el.row == cell.row)) || 
+            ((el.rowId == cell.rowId-1) && (el.row == cell.row + 1)) || 
+            ((el.rowId == cell.rowId) && (el.row == cell.row + 1)) || 
+            ((el.rowId == cell.rowId+1) && (el.row == cell.row + 1)) ||
+            ((el.rowId == cell.rowId-1) && (el.row == cell.row - 2)) ||
+            ((el.rowId == cell.rowId) && (el.row == cell.row - 2)) ||
+            ((el.rowId == cell.rowId+1) && (el.row == cell.row - 2)) || 
+            ((el.rowId == cell.rowId-2) && (el.row == cell.row -1)) || 
+            ((el.rowId == cell.rowId+2) && (el.row == cell.row - 1)) || 
+            ((el.rowId == cell.rowId-2) && (el.row == cell.row)) ||
+            ((el.rowId == cell.rowId+2) && (el.row == cell.row)) ||
+            ((el.rowId == cell.rowId-2) && (el.row == cell.row + 1)) ||
+            ((el.rowId == cell.rowId+2) && (el.row == cell.row + 1)) ||
+            ((el.rowId == cell.rowId-1) && (el.row == cell.row + 2)) ||
+            ((el.rowId == cell.rowId) && (el.row == cell.row + 2)) || 
+            ((el.rowId == cell.rowId+1) && (el.row == cell.row + 2))
+            ){
             if(el.isBomb == false){
-              return {id:el.id, rowId:el.rowId, isBomb:el.isBomb, value:el.value, isOpen:true}
+              console.log();
+              return {id:el.id, rowId:el.rowId, isBomb:el.isBomb, row:el.row, value:el.value, isOpen:true}
             }
             else{
               return el;
@@ -167,9 +206,24 @@ function App(){
         return newRow; 
       })
       setField(newArr);
-      setIsFirst(false);
     }
+    // setIsFirst(false);
   }
+
+  useEffect(() => {
+    let score = 0;
+    field.map((row) => {
+      row.map((el) => {
+        if(el.isOpen){
+          score++;
+          console.log(score);
+        }
+      })
+    })
+    if(score == 378){
+      alert("You won!")
+    }
+  }, [field])
 
   useEffect(() => {
     field.map((row) => {
@@ -190,7 +244,7 @@ function App(){
           {field.map((row) => {
             return(
               row.map((cell) => (
-                <div className={style1.cell} key={cell.id} onClick={() => {open(cell); poly(cell)}}>{cell.isOpen ? cell.value : null}</div>
+                <div className={style1.cell} key={cell.id} onClick={() => {open(cell); poly(cell)}}>{cell.isOpen ? cell.value : "."}</div>
               ))
             )
           })}
