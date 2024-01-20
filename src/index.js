@@ -11,6 +11,15 @@ function App(){
   let [end, setEnd] = useState(false);
   let [id, setId] = useState(0);
   let [isFirst, setIsFirst] = useState(true);
+  let [time, setTime] = useState(0);
+  let [demined, setDemined] = useState(0);
+  let [step, setStep] = useState(0);
+
+  useEffect(() => {
+    setInterval(() => {
+      setTime(++time);
+  }, 1000)
+  }, [])
 
   useEffect(() => {
     for(let i = 0; i < 21; i++){
@@ -137,6 +146,9 @@ function App(){
     let newArr = field.map((row, idR) => {
       let newRow = row.map((el) => {
         if(el.id == cell.id){
+          if(el.isOpen == false){
+            setDemined(++demined);
+          }
           return {id:cell.id, rowId:cell.rowId, row:idR, isBomb:cell.isBomb, value:cell.value, isOpen:true}
         }
         else{
@@ -146,23 +158,8 @@ function App(){
       return newRow; 
     })
     setField(newArr);
+    setStep(++step);
   }
-
-  // function aaa(cell){
-  //     let newArr = field.map((row) => {
-  //       let newRow = row.map((el) => {
-  //         if((el.id == cell.id-22) || (el.id == cell.id-21) || (el.id == cell.id-20) || (el.id == cell.id) || (el.id == cell.id-1) || (el.id == cell.id+1) || (el.id == cell.id+20) || (el.id == cell.id+21) || (el.id == cell.id+22)){
-  //             console.log("aaa");
-  //             return {id:el.id, rowId:el.rowId, isBomb:el.isBomb, value:el.value, isOpen:true}
-  //         }
-  //         else{
-  //           return el;
-  //         }
-  //       })
-  //       return newRow;
-  //     })
-  //     return(newArr);
-  // }
 
   function poly(cell){
     if(isFirst){
@@ -192,7 +189,9 @@ function App(){
             ((el.rowId == cell.rowId+1) && (el.row == cell.row + 2))
             ){
             if(el.isBomb == false){
-              console.log();
+              if(el.isOpen == false){
+                setDemined(demined++);
+              }
               return {id:el.id, rowId:el.rowId, isBomb:el.isBomb, row:el.row, value:el.value, isOpen:true}
             }
             else{
@@ -207,30 +206,59 @@ function App(){
       })
       setField(newArr);
     }
-    // setIsFirst(false);
+    setIsFirst(false);
+    setStep(++step);
+  }
+
+  function many() {
+    let newField = [...field];
+  
+    field.forEach((row) => {
+      row.forEach((cell) => {
+        if (cell.value == 0 && cell.isOpen) {
+          newField = newField.map((row) => {
+            return row.map((el) => {
+              if (
+                ((el.rowId === cell.rowId - 1 && el.row === cell.row - 1) ||
+                  (el.rowId === cell.rowId && el.row === cell.row - 1) ||
+                  (el.rowId === cell.rowId + 1 && el.row === cell.row - 1) ||
+                  (el.rowId === cell.rowId - 1 && el.row === cell.row) ||
+                  (el.rowId === cell.rowId + 1 && el.row === cell.row) ||
+                  (el.rowId === cell.rowId - 1 && el.row === cell.row + 1) ||
+                  (el.rowId === cell.rowId && el.row === cell.row + 1) ||
+                  (el.rowId === cell.rowId + 1 && el.row === cell.row + 1))
+              ) {
+                if(!el.isOpen){
+                  setDemined(demined++);
+                }
+                return { ...el, isOpen: true };
+              }
+              else {
+                return el;
+              }
+            });
+          });
+        }
+      });
+    });
+    if(newField){
+      setField(newField);
+    }
   }
 
   useEffect(() => {
-    let score = 0;
-    field.map((row) => {
-      row.map((el) => {
-        if(el.isOpen){
-          score++;
-          console.log(score);
-        }
-      })
-    })
-    if(score == 378){
-      alert("You won!")
-    }
-  }, [field])
+    many()
+  }, [demined])
 
-  useEffect(() => {
+    useEffect(() => {
     field.map((row) => {
       row.map((cell) => {
         if((cell.isBomb) && (cell.isOpen)){
           alert("You lose!");
           document.location.reload();
+        }
+        if(demined == 378){
+          alert("You won!")
         }
       })
     })
@@ -238,13 +266,15 @@ function App(){
 
   return(
     <div>
+      <h1>{time}</h1>
+      <b>Not demined: {378 - demined}</b>
       <h1>Sapper game</h1>
       <div className={style1.outside}>
         <div className={style1.field}>
           {field.map((row) => {
             return(
               row.map((cell) => (
-                <div className={style1.cell} key={cell.id} onClick={() => {open(cell); poly(cell)}}>{cell.isOpen ? cell.value : "."}</div>
+                <div className={style1.cell} key={cell.id} onClick={() => {open(cell); poly(cell)}}>{cell.isOpen ? cell.value : null}</div>
               ))
             )
           })}
