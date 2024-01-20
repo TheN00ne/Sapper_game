@@ -15,6 +15,56 @@ function App(){
   let [demined, setDemined] = useState(0);
   let [step, setStep] = useState(0);
 
+  function color(cell){
+    switch(cell.value){
+      case 0:
+        return {
+          color:"#979494",
+        }
+      break;
+      case 1:
+        return {
+          color:"#5e5e92",
+        }
+      break;
+      case 2:
+        return {
+          color:"#170c7c",
+        }
+      break;
+      case 3:
+        return {
+          color:"#1a6414",
+        }
+      break;
+      case 4:
+        return {
+          color:"#7f7f15",
+        }
+      break;
+      case 5:
+        return {
+          color:"#d28c16",
+        }
+      break;
+      case 6:
+        return {
+          color:"#c11414",
+        }
+      break;
+      case 7:
+        return {
+          color:"#762277",
+        }
+      break;
+      case 8:
+        return {
+          color:"black",
+        }
+      break;
+    }
+  }
+
   useEffect(() => {
     setInterval(() => {
       setTime(++time);
@@ -146,9 +196,6 @@ function App(){
     let newArr = field.map((row, idR) => {
       let newRow = row.map((el) => {
         if(el.id == cell.id){
-          if(el.isOpen == false){
-            setDemined(++demined);
-          }
           return {id:cell.id, rowId:cell.rowId, row:idR, isBomb:cell.isBomb, value:cell.value, isOpen:true}
         }
         else{
@@ -189,9 +236,6 @@ function App(){
             ((el.rowId == cell.rowId+1) && (el.row == cell.row + 2))
             ){
             if(el.isBomb == false){
-              if(el.isOpen == false){
-                setDemined(demined++);
-              }
               return {id:el.id, rowId:el.rowId, isBomb:el.isBomb, row:el.row, value:el.value, isOpen:true}
             }
             else{
@@ -228,9 +272,6 @@ function App(){
                   (el.rowId === cell.rowId && el.row === cell.row + 1) ||
                   (el.rowId === cell.rowId + 1 && el.row === cell.row + 1))
               ) {
-                if(!el.isOpen){
-                  setDemined(demined++);
-                }
                 return { ...el, isOpen: true };
               }
               else {
@@ -247,26 +288,42 @@ function App(){
   }
 
   useEffect(() => {
-    many()
+    many();
   }, [demined])
 
     useEffect(() => {
+    if(demined == 378){
+      alert(`You won! \n Time: ${Math.floor(time/60)} : ${time%60}`)
+      document.location.reload();
+    }
+
     field.map((row) => {
       row.map((cell) => {
         if((cell.isBomb) && (cell.isOpen)){
           alert("You lose!");
           document.location.reload();
         }
-        if(demined == 378){
-          alert("You won!")
-        }
       })
     })
   }, [field])
 
+  useEffect(() => {
+    let score = 0;
+    field.map((row) => {
+      row.map((el) => {
+        if(el.isOpen && !el.isBomb){
+          score++;
+        }
+      })
+    })
+    setDemined(score);
+    console.log(demined);
+  }, [field])
+
   return(
     <div>
-      <h1>{time}</h1>
+      <b>Time: {Math.floor(time/60) + ":" + time%60}</b>
+      <br/>
       <b>Not demined: {378 - demined}</b>
       <h1>Sapper game</h1>
       <div className={style1.outside}>
@@ -274,7 +331,7 @@ function App(){
           {field.map((row) => {
             return(
               row.map((cell) => (
-                <div className={style1.cell} key={cell.id} onClick={() => {open(cell); poly(cell)}}>{cell.isOpen ? cell.value : null}</div>
+                <div className={style1.cell} style={color(cell)} key={cell.id} tabIndex={1} onClick={() => {open(cell); poly(cell)}} onKeyDown={(e) => {if(e.code == "Space"){open(cell); poly(cell)}}}>{cell.isOpen ? cell.value : null}</div>
               ))
             )
           })}

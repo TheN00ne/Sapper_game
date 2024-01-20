@@ -1,12 +1,18 @@
 *{
     margin:0px;
-    background-color:#02001f;
+    background-color:#929198;
     font-family:Courier;
-    color:white;
+    font-weight:bold;
+    color:black;
 }
 
 h1{
     text-align:center;
+    text-transform:uppercase;
+}
+
+b{
+    margin:5px;
 }
 
 .outside{
@@ -15,7 +21,7 @@ h1{
 }
 
 .field{
-    background-color:#28272c;
+    background-color:#302f34;
     display:grid;
     grid-template-rows:repeat(21, 25px);
     grid-template-columns:repeat(21, 25px);
@@ -25,7 +31,7 @@ h1{
 }
 
 .cell{
-    background-color:#5e5a63;
+    background-color:#e9e9eb;
     text-align:center;
     line-height:25px;
     transition-duration:0.25s;
@@ -33,6 +39,7 @@ h1{
     font-size:20px;
 }
 
-.cell:hover{
-    background-color:#19151d;
+.cell:hover, .cell:focus{
+    background-color:#1d1735;
+    color:white;
 }
